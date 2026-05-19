@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8CCB63D2-58FE-4A27-B90A-ED5DE2E72150}</ProjectGuid>
+    <ProjectGuid>{04970148-7DFC-4E69-873D-122038869CB3}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Service</RootNamespace>
     <AssemblyName>Service</AssemblyName>
@@ -41,8 +41,12 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SmartGridService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -51,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{88b4d4f4-4362-40e6-b331-3d1c6c258bd3}</Project>
+      <Project>{d74cf187-b9ec-4b7c-975b-1ae007fa05b5}</Project>
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>

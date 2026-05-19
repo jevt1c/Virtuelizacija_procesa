@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E70B7672-D5AF-41E4-9DEB-B5E89BBBE70A}</ProjectGuid>
+    <ProjectGuid>{8AA52100-1F07-4C67-9E36-E3961B9DD365}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Client</RootNamespace>
     <AssemblyName>Client</AssemblyName>
@@ -41,8 +41,12 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CsvDataGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -51,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{88b4d4f4-4362-40e6-b331-3d1c6c258bd3}</Project>
+      <Project>{d74cf187-b9ec-4b7c-975b-1ae007fa05b5}</Project>
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>

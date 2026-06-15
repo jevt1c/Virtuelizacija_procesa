@@ -9,7 +9,7 @@ namespace Client
 {
     public static class CsvDataGenerator
     {
-        private const int MaxRows = 1_000_000;
+        private const int MaxRows = 106;
 
         public static List<SmartGridSample> ReadFromCsv(string filePath, out int skippedCount)
         {
@@ -30,22 +30,27 @@ namespace Client
             {
                 logWriter.WriteLine($"Parse errors log – {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                 logWriter.WriteLine($"Source: {filePath}");
+                logWriter.WriteLine($"Max rows: {MaxRows}");
                 logWriter.WriteLine(new string('-', 60));
 
                 string line;
                 int lineNum = 0;
-                int loaded  = 0;
+                int loaded = 0;
 
                 while ((line = reader.ReadLine()) != null)
                 {
                     lineNum++;
 
-
                     if (lineNum == 1) continue;
 
-                    if (loaded >= MaxRows) break;
-
                     if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    if (loaded >= MaxRows)
+                    {
+                        skippedCount++;
+                        logWriter.WriteLine($"Line {lineNum}: [VIŠAK] Red preskočen – dostignuto je {MaxRows} validnih redova | raw='{line}'");
+                        continue;
+                    }
 
                     try
                     {
@@ -56,13 +61,15 @@ namespace Client
                     catch (Exception ex)
                     {
                         skippedCount++;
-                        logWriter.WriteLine($"Line {lineNum}: {ex.Message} | raw='{line}'");
+                        logWriter.WriteLine($"Line {lineNum}: [NEVALIDAN] {ex.Message} | raw='{line}'");
                     }
                 }
+
+                logWriter.WriteLine(new string('-', 60));
+                logWriter.WriteLine($"Učitano validnih: {loaded} | Preskočeno: {skippedCount}");
             }
             return result;
         }
-
 
         private static SmartGridSample ParseLine(string line, int lineNum)
         {
@@ -72,11 +79,11 @@ namespace Client
             {
                 return new SmartGridSample(
                     ParseTimestamp(p[0], lineNum),
-                    ParseDouble(p[1], "Voltage",        lineNum),
-                    ParseDouble(p[2], "Current",        lineNum),
-                    ParseInt   (p[3], "FaultIndicator", lineNum),
-                    ParseDouble(p[4], "PowerUsage",     lineNum),
-                    ParseDouble(p[5], "Frequency",      lineNum)
+                    ParseDouble(p[1], "Voltage", lineNum),
+                    ParseDouble(p[2], "Current", lineNum),
+                    ParseInt(p[5], "FaultIndicator", lineNum),
+                    ParseDouble(p[3], "PowerUsage", lineNum),
+                    ParseDouble(p[4], "Frequency", lineNum)
                 );
             }
 
@@ -110,9 +117,9 @@ namespace Client
 
         public static List<SmartGridSample> GenerateSampleRecords(int count = 100)
         {
-            var rng    = new Random();
+            var rng = new Random();
             var result = new List<SmartGridSample>(count);
-            var start  = DateTime.Now.AddSeconds(-count);
+            var start = DateTime.Now.AddSeconds(-count);
 
             double prevFreq = 50.0;
 
@@ -121,9 +128,9 @@ namespace Client
                 double freqDelta = (rng.NextDouble() - 0.5) * 1.2;
                 double freq = Math.Max(45, prevFreq + freqDelta);
                 double volt = 220 + (rng.NextDouble() - 0.5) * 40;
-                double curr = 20  + (rng.NextDouble() - 0.5) * 30;
-                double pow  = Math.Abs(volt * curr * (0.8 + rng.NextDouble() * 0.4));
-                int fault   = rng.Next(100) < 5 ? rng.Next(1, 4) : 0;
+                double curr = 20 + (rng.NextDouble() - 0.5) * 30;
+                double pow = Math.Abs(volt * curr * (0.8 + rng.NextDouble() * 0.4));
+                int fault = rng.Next(100) < 5 ? rng.Next(1, 4) : 0;
 
                 result.Add(new SmartGridSample(
                     start.AddSeconds(i),
@@ -137,7 +144,6 @@ namespace Client
             }
             return result;
         }
-
 
         public static void SaveMemoryStreamToFile(string directory, string fileName, MemoryStream ms)
         {

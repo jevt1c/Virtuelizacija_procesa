@@ -364,7 +364,7 @@ namespace Service
             if (s.Voltage < 0)       return $"Voltage ne može biti negativan: {s.Voltage}";
             if (s.Current < 0)       return $"Current ne može biti negativan: {s.Current}";
             if (s.Timestamp == default) return "Timestamp nije postavljen.";
-            return null;   // valid
+            return null; 
         }
 
 

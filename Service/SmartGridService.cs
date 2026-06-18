@@ -99,13 +99,17 @@ namespace Service
         private double _freqRunningSum  = 0;
         private double _freqRunningCount = 0;
 
-        public event EventHandler<TransferStartedEventArgs>  OnTransferStarted;
-        public event EventHandler<SampleReceivedEventArgs>   OnSampleReceived;
+        //private readonly bool _simulateCrash;
+        //private readonly int  _simulateCrashAtSample;
+
+        //dogadjaji
+        public event EventHandler<TransferStartedEventArgs> OnTransferStarted;
+        public event EventHandler<SampleReceivedEventArgs> OnSampleReceived;
         public event EventHandler<TransferCompletedEventArgs> OnTransferCompleted;
-        public event EventHandler<WarningRaisedEventArgs>    OnWarningRaised;
-        public event EventHandler<FrequencySpikeEventArgs>   OnFrequencySpike;
+        public event EventHandler<WarningRaisedEventArgs> OnWarningRaised;
+        public event EventHandler<FrequencySpikeEventArgs> OnFrequencySpike;
         public event EventHandler<OutOfBandWarningEventArgs> OnOutOfBandWarning;
-        public event EventHandler<PowerSpikeEventArgs>       OnPowerSpike;
+        public event EventHandler<PowerSpikeEventArgs> OnPowerSpike;
 
 
         public SmartGridService()
@@ -114,6 +118,12 @@ namespace Service
             _pMaxThreshold = ParseConfig("P_max_threshold", 10000.0);
             _outOfBandPct  = ParseConfig("OutOfBand_Pct",  0.25);
 
+            // _simulateCrashAtSample = (int)ParseConfig("SimulateCrashAtSample", 0);
+            //_simulateCrash = _simulateCrashAtSample > 0;
+
+            //if (_simulateCrash)
+            //Console.WriteLine($"  [TEST MOD] Simulacija pada aktivna na {_simulateCrashAtSample}. uzorku sesije.");
+
             _dataPath = ConfigurationManager.AppSettings["dataPath"] ?? "SmartGridData";
             if (!Directory.Exists(_dataPath))
                 Directory.CreateDirectory(_dataPath);
@@ -121,12 +131,13 @@ namespace Service
             OnTransferStarted  += (s, e) => Log(ConsoleColor.Cyan,
                 $"[START SESSION] {e.SessionId} | src={e.SourceFile} | expectedRows={e.ExpectedRows}");
 
+            //'prenos u toku' za svaki uzorak
             OnSampleReceived   += (s, e) =>
             {
-                if (e.SampleIndex % 100 == 0)
+                if (e.SampleIndex % 1 == 0)
                     Log(ConsoleColor.Gray, $"  prenos u toku... primljeno {e.SampleIndex} uzoraka");
             };
-
+            //'završen prenos' ispis
             OnTransferCompleted += (s, e) => Log(ConsoleColor.Green,
                 $"[END SESSION] {e.SessionId} | primljeno={e.TotalReceived} odbijeno={e.TotalRejected} | završen prenos");
 
@@ -150,6 +161,7 @@ namespace Service
             Console.ResetColor();
         }
 
+        //rejects.csv i measurements_session.csv
         public SmartGridResponse StartSession(SessionMeta meta)
         {
             try
@@ -157,11 +169,11 @@ namespace Service
                 if (_sessionId != null)
                     return Nack("Sesija je već aktivna. Pozovite EndSession() pre nove sesije.", SessionStatus.IN_PROGRESS);
 
-                _sessionId       = meta?.SessionId ?? Guid.NewGuid().ToString("N").Substring(0, 8);
+                _sessionId = meta?.SessionId ?? Guid.NewGuid().ToString("N").Substring(0, 8);
                 _sessionReceived = 0;
                 _sessionRejected = 0;
-                _prevFrequency   = double.NaN;
-                _freqRunningSum  = 0;
+                _prevFrequency = double.NaN;
+                _freqRunningSum = 0;
                 _freqRunningCount = 0;
 
 
@@ -211,6 +223,8 @@ namespace Service
                     new ValidationFault(validationError, "sample"), validationError);
             }
 
+            //try
+            //{
             _sessionReceived++;
             _allRecords.Add(sample);
             _sessionWriter.WriteLine(sample.ToCsvLine());
@@ -219,6 +233,10 @@ namespace Service
             OnSampleReceived?.Invoke(this, new SampleReceivedEventArgs(sample, _sessionReceived));
 
 
+            //if (_simulateCrash && _sessionReceived == _simulateCrashAtSample)
+            //throw new InvalidOperationException(
+            //$"SIMULACIJA: nagli prekid veze posle {_sessionReceived}. uzorka (test Dispose pattern-a, Zadatak 4)");
+
             //ΔF = f(t) − f(t−Δt)
             AnalyzeFrequency(sample);
 
@@ -226,6 +244,14 @@ namespace Service
             AnalyzePower(sample);
 
             return Ack($"Uzorak {_sessionReceived} prihvaćen.", SessionStatus.IN_PROGRESS);
+            //}
+            //catch (Exception ex)
+            //{
+            //CloseSessionWriters();
+            //_sessionId = null;
+            //throw new FaultException<ValidationFault>(
+            //new ValidationFault($"Sesija prekinuta zbog greške: {ex.Message}"), ex.Message);
+            //}
         }
 
         public SmartGridResponse EndSession()
@@ -305,6 +331,7 @@ namespace Service
             { throw new FaultException<SmartGridException>(new SmartGridException(ex.Message), ex.Message); }
         }
 
+        //analiza frekvencije
         private void AnalyzeFrequency(SmartGridSample s)
         {
             _freqRunningSum += s.Frequency;
@@ -341,6 +368,7 @@ namespace Service
             }
         }
 
+        //analiza snage
         private void AnalyzePower(SmartGridSample s)
         {
             double p = s.ComputedPower;
@@ -356,13 +384,13 @@ namespace Service
             }
         }
 
-
+        // validacija uzoraka
         private string ValidateSample(SmartGridSample s)
         {
-            if (s == null)           return "Uzorak je null.";
-            if (s.Frequency <= 0)    return $"Frequency mora biti > 0, dobijeno: {s.Frequency}";
-            if (s.Voltage < 0)       return $"Voltage ne može biti negativan: {s.Voltage}";
-            if (s.Current < 0)       return $"Current ne može biti negativan: {s.Current}";
+            if (s == null) return "Uzorak je null.";
+            if (s.Frequency <= 0) return $"Frequency mora biti > 0, dobijeno: {s.Frequency}";
+            if (s.Voltage < 0) return $"Voltage ne može biti negativan: {s.Voltage}";
+            if (s.Current < 0) return $"Current ne može biti negativan: {s.Current}";
             if (s.Timestamp == default) return "Timestamp nije postavljen.";
             return null; 
         }

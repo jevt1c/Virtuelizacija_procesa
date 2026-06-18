@@ -135,7 +135,7 @@ namespace Client
                 Console.WriteLine($"\nSlanje {records.Count} uzoraka sekvencijalno...");
                 int sent = 0;
                 int rejected = 0;
-
+                //sekvencijalno slanje
                 foreach (var sample in records)
                 {
                     try

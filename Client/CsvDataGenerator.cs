@@ -11,6 +11,7 @@ namespace Client
     {
         private const int MaxRows = 106;
 
+        //citanje iz csv fajla
         public static List<SmartGridSample> ReadFromCsv(string filePath, out int skippedCount)
         {
             skippedCount = 0;
@@ -48,7 +49,7 @@ namespace Client
                     if (loaded >= MaxRows)
                     {
                         skippedCount++;
-                        logWriter.WriteLine($"Line {lineNum}: [VIŠAK] Red preskočen – dostignuto je {MaxRows} validnih redova | raw='{line}'");
+                        logWriter.WriteLine($"Line {lineNum}: [VIŠAK] Red preskočen - dostignuto je {MaxRows} validnih redova | raw='{line}'");
                         continue;
                     }
 

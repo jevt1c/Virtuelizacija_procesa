@@ -14,6 +14,7 @@ namespace Service
             try
             {
                 serviceInstance = new SmartGridService();
+                //hostovanje
                 host = new ServiceHost(serviceInstance);
 
                 host.Open();

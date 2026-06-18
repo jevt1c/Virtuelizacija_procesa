@@ -20,22 +20,23 @@ namespace Common
         public SmartGridSample(DateTime timestamp, double voltage, double current,
             int faultIndicator, double powerUsage, double frequency)
         {
-            _id             = ++_counter;
-            _timestamp      = timestamp;
-            _voltage        = voltage;
-            _current        = current;
+            _id = ++_counter;
+            _timestamp = timestamp;
+            _voltage = voltage;
+            _current = current;
             _faultIndicator = faultIndicator;
-            _powerUsage     = powerUsage;
-            _frequency      = frequency;
+            _powerUsage = powerUsage;
+            _frequency = frequency;
         }
 
-        [DataMember] public int      Id             { get => _id;             set => _id = value; }
-        [DataMember] public DateTime Timestamp      { get => _timestamp;      set => _timestamp = value; }
-        [DataMember] public double   Voltage        { get => _voltage;        set => _voltage = value; }
-        [DataMember] public double   Current        { get => _current;        set => _current = value; }
-        [DataMember] public int      FaultIndicator { get => _faultIndicator; set => _faultIndicator = value; }
-        [DataMember] public double   PowerUsage     { get => _powerUsage;     set => _powerUsage = value; }
-        [DataMember] public double   Frequency      { get => _frequency;      set => _frequency = value; }
+        //meta zaglavlje
+        [DataMember] public int Id { get => _id; set => _id = value; }
+        [DataMember] public DateTime Timestamp { get => _timestamp; set => _timestamp = value; }
+        [DataMember] public double Voltage { get => _voltage; set => _voltage = value; }
+        [DataMember] public double Current { get => _current; set => _current = value; }
+        [DataMember] public int FaultIndicator { get => _faultIndicator; set => _faultIndicator = value; }
+        [DataMember] public double PowerUsage { get => _powerUsage; set => _powerUsage = value; }
+        [DataMember] public double Frequency { get => _frequency; set => _frequency = value; }
 
         // P(t) = V(t) * I(t)
         public double ComputedPower => _voltage * _current;

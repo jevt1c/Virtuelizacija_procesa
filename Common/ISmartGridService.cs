@@ -7,6 +7,8 @@ namespace Common
     [ServiceContract]
     public interface ISmartGridService
     {
+
+        //tri poruke
         [OperationContract]
         [FaultContract(typeof(ValidationFault))]
         [FaultContract(typeof(DataFormatFault))]
@@ -33,10 +35,12 @@ namespace Common
         FileManipulationResults GetFiles(FileManipulationOptions options);
     }
 
-
+    //ACK i status
     public enum AckStatus  { ACK, NACK }
     public enum SessionStatus { IN_PROGRESS, COMPLETED }
 
+
+    //meta zaglavlje za sesiju
     [DataContract]
     public class SessionMeta
     {
@@ -44,6 +48,7 @@ namespace Common
         [DataMember] public string SourceFile { get; set; }
         [DataMember] public int ExpectedRows { get; set; }
     }
+
 
     [DataContract]
     public class SmartGridResponse
